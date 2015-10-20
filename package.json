@@ -1,6 +1,6 @@
 {
   "name": "nanocyte-interval-fire-on-demand",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Fire nanocyte intervals on demand",
   "main": "command.js",
   "scripts": {

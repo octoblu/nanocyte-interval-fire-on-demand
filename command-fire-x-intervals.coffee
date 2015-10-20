@@ -9,8 +9,8 @@ class CommandFireXIntervals
   parseOptions: =>
     commander
       .option '-n, --number-of-intervals [n]', 'Number of parallel intervals per second (defaults to 1)', @parseInt, 1
-      .option '-h, --hostname', 'Redis Hostname'
-      .option '-p, --port', 'Redis port'
+      .option '-h, --hostname [host]', 'Redis Hostname'
+      .option '-p, --port [port]', 'Redis port'
       .parse process.argv
 
     {@numberOfIntervals,@hostname,@port} = commander
