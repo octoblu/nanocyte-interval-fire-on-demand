@@ -19,7 +19,7 @@ class CommandFireXIntervals
     client = redis.createClient @redisUri
     intervalService = new IntervalService {}, client: client
     intervalService.fetchXIntervals @numberOfIntervals, (error, intervals) =>
-      async.eachSeries intervals, intervalService.fireInterval, =>
+      async.each intervals, intervalService.fireInterval, =>
         process.exit 0
 
   die: (error) =>
