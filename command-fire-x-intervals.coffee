@@ -8,12 +8,14 @@ IntervalService = require './src/interval-service'
 class CommandFireXIntervals
   parseOptions: =>
     commander
-      .option '-n, --number-of-intervals [n]', 'Number of parallel intervals per second (defaults to 1)', @parseInt, 1
-      .option '-o, --offset [n]', 'Offset start position (defaults to 0)', @parseInt, 0
-      .option '-r, --redis-uri [uri]', 'Redis client URI'
+      .option '-n, --number-of-intervals <n>', 'Number of parallel intervals per second (defaults to 1)', parseInt
+      .option '-o, --offset <o>', 'Offset start position (defaults to 0)', parseInt
+      .option '-r, --redis-uri <uri>', 'Redis client URI'
       .parse process.argv
 
     {@numberOfIntervals,@offset,@redisUri} = commander
+    @offset ?= 0
+    @numberOfIntervals ?= 1
 
   run: =>
     @parseOptions()
