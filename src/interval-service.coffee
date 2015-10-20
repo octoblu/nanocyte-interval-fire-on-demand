@@ -5,20 +5,27 @@ MeshbluHttp = require 'meshblu-http'
 MeshbluConfig = require 'meshblu-config'
 
 class IntervalService
-  constructor: (options, {@meshbluHttp, @client})->
+  constructor: ({@prefix}, {@meshbluHttp, @client})->
+    @prefix ?= 'interval/time'
     meshbluConfig = new MeshbluConfig().toJSON()
     @meshbluHttp ?= new MeshbluHttp meshbluConfig
     @client ?= redis.createClient()
 
   fetchXIntervals: (x, callback) ->
-    @client.keys 'interval/time/*', (error, result) =>
+    @client.keys "#{@prefix}/*", (error, result) =>
       return callback error if error?
       sortedKeys = _.sortBy result
       intervalKeys = _.slice sortedKeys, 0, x
       callback null, intervalKeys
 
+  fetchFlowIntervals: (flowId, callback) ->
+    @client.keys "#{@prefix}/#{flowId}/*", (error, result) =>
+      return callback error if error?
+      callback null, result
+
   fireInterval: (interval, callback) =>
-    [interval, time, device, nonce] = interval.split '/'
+    interval = interval.replace("#{@prefix}/", '')
+    [device, nonce] = interval.split '/'
     debug 'firing interval', device, nonce
     message =
       devices: [device]

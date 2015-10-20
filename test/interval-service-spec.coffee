@@ -7,25 +7,22 @@ describe 'IntervalService', ->
   beforeEach ->
     @client = redis.createClient()
     @meshbluHttp = message: sinon.stub()
-    @dependencies = meshbluHttp: @meshbluHttp
-    @sut = new IntervalService {}, @dependencies
+    @dependencies = meshbluHttp: @meshbluHttp, client: @client
+    @sut = new IntervalService prefix: 'test/interval/time', @dependencies
 
   beforeEach (done) ->
     async.parallel [
-      (next) => @client.set 'interval/time/a-uuid/a-nonce', '1000', next
-      (next) => @client.set 'interval/time/another-uuid/another-nonce', '1000', next
-      (next) => @client.set 'interval/time/yet-another-uuid/yet-another-nonce', '1000', next
+      (next) => @client.set 'test/interval/time/a-uuid/a-nonce', '1000', next
+      (next) => @client.set 'test/interval/time/another-uuid/another-nonce', '1000', next
+      (next) => @client.set 'test/interval/time/yet-another-uuid/yet-another-nonce', '1000', next
     ], done
 
   afterEach (done) ->
     async.parallel [
-      (next) => @client.del 'interval/time/a-uuid/a-nonce', next
-      (next) => @client.del 'interval/time/another-uuid/another-nonce', next
-      (next) => @client.del 'interval/time/yet-another-uuid/yet-another-nonce', next
+      (next) => @client.del 'test/interval/time/a-uuid/a-nonce', next
+      (next) => @client.del 'test/interval/time/another-uuid/another-nonce', next
+      (next) => @client.del 'test/interval/time/yet-another-uuid/yet-another-nonce', next
     ], done
-
-  it 'should exist', ->
-    expect(@sut).to.exist
 
   describe '->fetchXIntervals', ->
     describe 'when given 1 interval', ->
@@ -35,7 +32,7 @@ describe 'IntervalService', ->
 
       it 'should return 1 interval', ->
         expect(@result).to.deep.equal [
-          'interval/time/a-uuid/a-nonce'
+          'test/interval/time/a-uuid/a-nonce'
         ]
 
     describe 'when given 2 intervals', ->
@@ -45,14 +42,36 @@ describe 'IntervalService', ->
 
       it 'should return 2 intervals', ->
         expect(@result).to.deep.equal [
-          'interval/time/a-uuid/a-nonce'
-          'interval/time/another-uuid/another-nonce'
+          'test/interval/time/a-uuid/a-nonce'
+          'test/interval/time/another-uuid/another-nonce'
         ]
+
+  describe '->fetchFlowIntervals', ->
+    describe 'when given a-uuid', ->
+      beforeEach (done) ->
+        @sut.fetchFlowIntervals 'a-uuid', (@error, @result) =>
+          done()
+
+      it 'should return 1 interval', ->
+        expect(@result).to.deep.equal [
+          'test/interval/time/a-uuid/a-nonce'
+        ]
+
+    # describe 'when given 2 intervals', ->
+    #   beforeEach (done) ->
+    #     @sut.fetchXIntervals 2, (@error, @result) =>
+    #       done()
+    #
+    #   it 'should return 2 intervals', ->
+    #     expect(@result).to.deep.equal [
+    #       'test/interval/time/a-uuid/a-nonce'
+    #       'test/interval/time/another-uuid/another-nonce'
+    #     ]
 
   describe '->fireInterval', ->
     beforeEach (done) ->
       @meshbluHttp.message.yields null
-      @sut.fireInterval 'interval/time/a-uuid/a-nonce', =>
+      @sut.fireInterval 'test/interval/time/a-uuid/a-nonce', =>
         done()
 
     it 'should send a meshblu message', ->
