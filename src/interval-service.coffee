@@ -1,5 +1,6 @@
 _ = require 'lodash'
 redis = require 'redis'
+debug = require('debug')('nanocyte-interval-fire-on-demand:interval-service')
 MeshbluHttp = require 'meshblu-http'
 MeshbluConfig = require 'meshblu-config'
 
@@ -14,11 +15,11 @@ class IntervalService
       return callback error if error?
       sortedKeys = _.sortBy result
       intervalKeys = _.slice sortedKeys, 0, x
-      console.log intervalKeys
       callback null, intervalKeys
 
   fireInterval: (interval, callback) =>
     [interval, time, device, nonce] = interval.split '/'
+    debug 'firing interval', device, nonce
     message =
       devices: [device]
       payload:
