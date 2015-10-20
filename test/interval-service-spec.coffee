@@ -15,6 +15,7 @@ describe 'IntervalService', ->
       (next) => @client.set 'test/interval/time/a-uuid/a-nonce', '1000', next
       (next) => @client.set 'test/interval/time/another-uuid/another-nonce', '1000', next
       (next) => @client.set 'test/interval/time/yet-another-uuid/yet-another-nonce', '1000', next
+      (next) => @client.set 'test/interval/time/yet-some-more-uuid/yet-some-nonce', '1000', next
     ], done
 
   afterEach (done) ->
@@ -22,12 +23,13 @@ describe 'IntervalService', ->
       (next) => @client.del 'test/interval/time/a-uuid/a-nonce', next
       (next) => @client.del 'test/interval/time/another-uuid/another-nonce', next
       (next) => @client.del 'test/interval/time/yet-another-uuid/yet-another-nonce', next
+      (next) => @client.del 'test/interval/time/yet-some-more-uuid/yet-some-nonce', next
     ], done
 
   describe '->fetchXIntervals', ->
     describe 'when given 1 interval', ->
       beforeEach (done) ->
-        @sut.fetchXIntervals 1, (@error, @result) =>
+        @sut.fetchXIntervals 1, 0, (@error, @result) =>
           done()
 
       it 'should return 1 interval', ->
@@ -37,13 +39,44 @@ describe 'IntervalService', ->
 
     describe 'when given 2 intervals', ->
       beforeEach (done) ->
-        @sut.fetchXIntervals 2, (@error, @result) =>
+        @sut.fetchXIntervals 2, 0, (@error, @result) =>
           done()
 
       it 'should return 2 intervals', ->
         expect(@result).to.deep.equal [
           'test/interval/time/a-uuid/a-nonce'
           'test/interval/time/another-uuid/another-nonce'
+        ]
+
+    describe 'when given 1 interval with an offset of 1', ->
+      beforeEach (done) ->
+        @sut.fetchXIntervals 1, 1, (@error, @result) =>
+          done()
+
+      it 'should return the 2nd interval', ->
+        expect(@result).to.deep.equal [
+          'test/interval/time/another-uuid/another-nonce'
+        ]
+
+    describe 'when given 1 interval with an offset of 2', ->
+      beforeEach (done) ->
+        @sut.fetchXIntervals 1, 2, (@error, @result) =>
+          done()
+
+      it 'should return the 3rd interval', ->
+        expect(@result).to.deep.equal [
+          'test/interval/time/yet-another-uuid/yet-another-nonce'
+        ]
+
+    describe 'when given 2 interval with an offset of 1', ->
+      beforeEach (done) ->
+        @sut.fetchXIntervals 2, 1, (@error, @result) =>
+          done()
+
+      it 'should return the 2nd and 3rd interval', ->
+        expect(@result).to.deep.equal [
+          'test/interval/time/another-uuid/another-nonce'
+          'test/interval/time/yet-another-uuid/yet-another-nonce'
         ]
 
   describe '->fetchFlowIntervals', ->

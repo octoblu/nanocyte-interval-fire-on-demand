@@ -11,11 +11,11 @@ class IntervalService
     @meshbluHttp ?= new MeshbluHttp meshbluConfig
     @client ?= redis.createClient()
 
-  fetchXIntervals: (x, callback) ->
+  fetchXIntervals: (numberOfIntervals, offset, callback) ->
     @client.keys "#{@prefix}/*", (error, result) =>
       return callback error if error?
       sortedKeys = _.sortBy result
-      intervalKeys = _.slice sortedKeys, 0, x
+      intervalKeys = _.slice sortedKeys, offset, numberOfIntervals+offset
       callback null, intervalKeys
 
   fetchFlowIntervals: (flowId, callback) ->

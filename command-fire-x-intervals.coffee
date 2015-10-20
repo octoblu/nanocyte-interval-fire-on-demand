@@ -9,16 +9,17 @@ class CommandFireXIntervals
   parseOptions: =>
     commander
       .option '-n, --number-of-intervals [n]', 'Number of parallel intervals per second (defaults to 1)', @parseInt, 1
+      .option '-o, --offset [n]', 'Offset start position (defaults to 0)', @parseInt, 0
       .option '-r, --redis-uri [uri]', 'Redis client URI'
       .parse process.argv
 
-    {@numberOfIntervals,@redisUri} = commander
+    {@numberOfIntervals,@offset,@redisUri} = commander
 
   run: =>
     @parseOptions()
     client = redis.createClient @redisUri
     intervalService = new IntervalService {}, client: client
-    intervalService.fetchXIntervals @numberOfIntervals, (error, intervals) =>
+    intervalService.fetchXIntervals @numberOfIntervals, @offset, (error, intervals) =>
       async.each intervals, intervalService.fireInterval, =>
         process.exit 0
 
